@@ -82,10 +82,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setCart(await api<Cart>("/cart/items", { method: "POST", body: { productId: product.id, quantity } }));
       toast({
         kind: "success",
-        title: "Added to cart",
+        title: "Added to your bag",
         body: quantity > 1 ? `${quantity} × ${product.name}` : product.name,
         image: product.imageUrl,
-        action: { label: "View cart", onClick: () => setCartOpen(true) },
+        action: { label: "View bag", onClick: () => setCartOpen(true) },
       });
     },
     setQuantity: async (productId, quantity) =>

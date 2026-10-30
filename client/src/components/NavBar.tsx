@@ -43,10 +43,10 @@ export function NavBar() {
   ];
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `relative flex items-center gap-1 px-3 py-3.5 text-sm font-medium whitespace-nowrap transition-colors hover:text-brand-600 dark:hover:text-brand-400 ${isActive ? "text-brand-600 dark:text-brand-400 after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:bg-current" : "text-ink-2"}`;
+    `relative flex items-center gap-1 px-3 py-3.5 text-sm font-medium whitespace-nowrap transition-colors hover:text-ink ${isActive ? "text-ink after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-ink" : "text-ink-2"}`;
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-line bg-card/85 backdrop-blur-lg" aria-label="Main">
+    <nav className="sticky top-0 z-40 border-b border-line bg-card/90 backdrop-blur" aria-label="Main">
       <div className="mx-auto max-w-7xl px-4">
         <button className="flex cursor-pointer items-center gap-2 py-3 text-sm font-semibold md:hidden" onClick={() => setOpen(true)} aria-expanded={open}>
           <Menu className="size-5" /> Browse departments

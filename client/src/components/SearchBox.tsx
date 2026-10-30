@@ -68,16 +68,16 @@ export function SearchBox() {
             aria-expanded={showPanel}
             aria-controls="search-suggestions"
             aria-autocomplete="list"
-            className="w-full min-w-0 rounded-s-xl border-0 bg-white px-4 py-2.5 pe-9 text-slate-900 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 focus:ring-inset"
+            className="w-full min-w-0 rounded-s-lg border border-e-0 border-line bg-page px-4 py-2.5 pe-9 text-ink outline-none placeholder:text-ink-3 focus:border-ink-3"
           />
           {q && (
-            <button type="button" onClick={() => (setQ(""), setResults([]))} className="absolute end-2 top-1/2 -translate-y-1/2 cursor-pointer p-1 text-slate-400 hover:text-slate-700" aria-label="Clear search">
+            <button type="button" onClick={() => (setQ(""), setResults([]))} className="absolute end-2 top-1/2 -translate-y-1/2 cursor-pointer p-1 text-ink-3 hover:text-ink" aria-label="Clear search">
               <X className="size-4" />
             </button>
           )}
         </div>
-        <button className="cursor-pointer rounded-e-xl bg-brand-600 px-4 hover:bg-brand-700" aria-label="Search">
-          <Search className="size-5" />
+        <button className="cursor-pointer rounded-e-lg bg-ink px-4 text-page hover:bg-ink/85" aria-label="Search">
+          <Search className="size-4" />
         </button>
       </form>
       {showPanel && (

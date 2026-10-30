@@ -1,6 +1,8 @@
 # ShopSphere
 
-A full-stack e-commerce store: everything under one roof, at amazing prices.
+A small online shop for well-made everyday things, built as a full-stack TypeScript project.
+
+**Design:** warm paper tones with a single clay accent, Fraunces serif headings over Inter, flat surfaces and catalogue-style product cards. Colours are semantic tokens in `client/src/index.css`, so dark mode is just a second set of values. The brand story and shop copy are placeholder text for a fictional shop, so replace them with your own.
 
 | Layer    | Stack |
 |----------|-------|

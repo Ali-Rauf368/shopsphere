@@ -24,13 +24,13 @@ async function signup(page: Page) {
 const toast = (page: Page, text: string | RegExp) => page.getByRole("status").filter({ hasText: text });
 
 test.describe("browsing", () => {
-  test("home page shows hero, departments, deals and category sections", async ({ page }) => {
+  test("home page shows hero, departments, markdowns and category sections", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Tech that keeps up with you" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Fewer gadgets, better ones." })).toBeVisible();
     const nav = page.getByRole("navigation", { name: "Main" });
     await expect(nav.getByRole("listitem").filter({ has: page.locator(":scope > a") })).toHaveCount(9);
-    await expect(page.getByRole("heading", { name: "Today's flash deals" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Best sellers" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "This week's markdowns" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Most popular" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Electronics", level: 2 })).toBeVisible();
     await expect(page.getByTestId("product-card").first()).toBeVisible();
   });
@@ -132,7 +132,7 @@ test.describe("mobile", () => {
 test.describe("accounts", () => {
   test("adding to cart while logged out redirects to login and back", async ({ page }) => {
     await page.goto("/product/dinosaur-atlas");
-    await page.getByRole("button", { name: "Add to cart" }).click();
+    await page.getByRole("button", { name: "Add to bag" }).click();
     await expect(page).toHaveURL(/\/login/);
     await page.getByRole("button", { name: "Customer" }).click();
     await page.getByRole("button", { name: "Log in" }).click();
@@ -165,14 +165,14 @@ test.describe("shopping", () => {
     await page.goto("/product/dinosaur-atlas");
     await page.getByRole("button", { name: "Increase" }).click();
     await expect(page.getByTestId("qty")).toHaveText("2");
-    await page.getByRole("button", { name: "Add to cart" }).click();
-    await expect(toast(page, "Added to cart")).toBeVisible();
+    await page.getByRole("button", { name: "Add to bag" }).click();
+    await expect(toast(page, "Added to your bag")).toBeVisible();
     await expect(page.getByTestId("cart-count")).toHaveText("2");
 
-    await page.getByRole("button", { name: "Cart", exact: true }).click();
-    const drawer = page.getByRole("dialog", { name: "Shopping cart" });
+    await page.getByRole("button", { name: "Bag", exact: true }).click();
+    const drawer = page.getByRole("dialog", { name: "Your bag" });
     await expect(drawer.getByTestId("drawer-item")).toHaveCount(1);
-    await expect(drawer.getByText(/more for free shipping/)).toBeVisible();
+    await expect(drawer.getByText(/away from free shipping/)).toBeVisible();
     await drawer.getByRole("link", { name: "Checkout" }).click();
 
     await expect(page).toHaveURL(/\/checkout/);
@@ -191,7 +191,7 @@ test.describe("shopping", () => {
 
     await page.getByRole("button", { name: /Place order/ }).click();
     await expect(page).toHaveURL(/\/orders\/\d+\?placed=1/);
-    await expect(page.getByRole("heading", { name: "Thank you, E2E!" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Thanks, E2E/ })).toBeVisible();
     await expect(page.getByRole("list", { name: "Order progress" })).toContainText("Order placed");
     await expect(page.getByTestId("cart-count")).toHaveCount(0);
 
@@ -204,7 +204,7 @@ test.describe("shopping", () => {
   test("invalid coupon shows the reason", async ({ page }) => {
     await signup(page);
     await page.goto("/product/dinosaur-atlas");
-    await page.getByRole("button", { name: "Add to cart" }).click();
+    await page.getByRole("button", { name: "Add to bag" }).click();
     await expect(page.getByTestId("cart-count")).toHaveText("1");
     await page.goto("/checkout");
     await page.getByLabel("Coupon code").fill("BIG20");

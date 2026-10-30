@@ -105,7 +105,7 @@ export function AccountPage() {
   ];
   return (
     <>
-      <PageTitle eyebrow="Account" sub={user.email}>Hi, {user.name.split(" ")[0]} 👋</PageTitle>
+      <PageTitle eyebrow="Account" sub={user.email}>Hi, {user.name.split(" ")[0]}</PageTitle>
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         {tiles.map((t) => (
           <Link key={t.to} to={t.to}>

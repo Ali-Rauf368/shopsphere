@@ -12,7 +12,7 @@ import { STATUS_STYLES } from "./Orders";
 
 const dollars = (cents: number) => `$${Math.round(cents / 100).toLocaleString()}`;
 const tooltipStyle = { background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12, color: "var(--ink)" };
-const BAR_COLORS = ["#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff"];
+const BAR_COLORS = ["#8a4122", "#a9532c", "#c46a3f", "#d98a62", "#e7b192", "#f1d3bf"];
 
 function Overview() {
   const stats = useApi<AdminStats>("/admin/stats");
@@ -39,7 +39,7 @@ function Overview() {
               <p className="text-sm text-ink-2">{label}</p>
               <span className="rounded-lg bg-brand-50 p-2 text-brand-600 dark:bg-soft dark:text-brand-400"><Icon className="size-4" /></span>
             </div>
-            <p className="mt-2 text-3xl font-extrabold tracking-tight" data-testid={`stat-${label.toLowerCase()}`}>{value}</p>
+            <p className="mt-2 text-3xl" data-testid={`stat-${label.toLowerCase()}`}>{value}</p>
             <p className="mt-1 text-xs text-ink-3">{sub}</p>
           </Card>
         ))}
@@ -50,13 +50,13 @@ function Overview() {
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={s.daily}>
               <defs>
-                <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#6366f1" stopOpacity={0.35} /><stop offset="100%" stopColor="#6366f1" stopOpacity={0} /></linearGradient>
+                <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#c46a3f" stopOpacity={0.35} /><stop offset="100%" stopColor="#c46a3f" stopOpacity={0} /></linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
               <XAxis dataKey="day" tickFormatter={(d: string) => d.slice(5)} fontSize={12} stroke="var(--ink-3)" tickLine={false} />
               <YAxis tickFormatter={dollars} fontSize={12} width={60} stroke="var(--ink-3)" tickLine={false} axisLine={false} />
               <Tooltip contentStyle={tooltipStyle} formatter={(v) => formatPrice(Number(v))} />
-              <Area type="monotone" dataKey="revenueCents" name="Revenue" stroke="#4f46e5" strokeWidth={2.5} fill="url(#rev)" />
+              <Area type="monotone" dataKey="revenueCents" name="Revenue" stroke="#a9532c" strokeWidth={2.5} fill="url(#rev)" />
             </AreaChart>
           </ResponsiveContainer>
         </Card>

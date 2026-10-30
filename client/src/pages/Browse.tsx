@@ -60,7 +60,7 @@ function Filters({ subcategories }: { subcategories?: { slug: string; name: stri
           {[4, 3].map((r) => (
             <label key={r} className="flex cursor-pointer items-center gap-2.5 text-ink-2 hover:text-ink">
               <input type="radio" name="rating" className={radio} checked={params.get("minRating") === String(r)} onChange={() => set({ minRating: String(r) })} />
-              <span className="flex items-center gap-1">{r}<Star className="size-3.5 fill-amber-400 text-amber-400" /> &amp; up</span>
+              <span className="flex items-center gap-1">{r}<Star className="size-3.5 fill-ink text-ink" /> &amp; up</span>
             </label>
           ))}
         </div>
@@ -238,7 +238,7 @@ export function OffersPage() {
               </video>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6">
-                <span className="rounded-full bg-rose-600 px-2.5 py-1 text-xs font-bold">−{p.discountPercent}% this week</span>
+                <span className="rounded bg-card px-2 py-1 text-xs font-medium text-ink">−{p.discountPercent}% this week</span>
                 <p className="mt-2 text-2xl font-bold">{p.name}</p>
               </div>
             </Link>

@@ -38,8 +38,8 @@ function Timeline({ order }: { order: Order }) {
         const at = order.events.find((e) => e.status === s.status)?.at;
         return (
           <li key={s.status} className="relative flex flex-col items-center text-center">
-            {i > 0 && <span className={`absolute end-1/2 top-5 h-1 w-full -translate-y-1/2 ${done ? "bg-brand-600" : "bg-line"}`} />}
-            <span className={`relative grid size-10 place-items-center rounded-full ${done ? "bg-brand-600 text-white" : "bg-soft text-ink-3"}`}><s.icon className="size-5" /></span>
+            {i > 0 && <span className={`absolute end-1/2 top-5 h-1 w-full -translate-y-1/2 ${done ? "bg-ink" : "bg-line"}`} />}
+            <span className={`relative grid size-10 place-items-center rounded-full ${done ? "bg-ink text-page" : "bg-soft text-ink-3"}`}><s.icon className="size-5" /></span>
             <span className={`mt-2 text-sm font-semibold ${done ? "" : "text-ink-3"}`}>{s.label}</span>
             <span className="text-xs text-ink-3">{at ? new Date(at).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : i === reached + 1 ? "Up next" : " "}</span>
           </li>
@@ -58,7 +58,7 @@ export function OrdersPage() {
   if (!user) return <Navigate to="/login" state={{ from: "/orders" }} replace />;
   if (error) return <ErrorBox error={error} />;
   if (loading && !data) return <Loading />;
-  if (data?.orders.length === 0) return <EmptyState icon={Package} title="No orders yet" body="When you place an order, you'll be able to track it here." action={{ label: "Start shopping", to: "/" }} />;
+  if (data?.orders.length === 0) return <EmptyState icon={Package} title="No orders yet" body="When you place an order, you'll be able to track it here." action={{ label: "Browse the shop", to: "/" }} />;
 
   return (
     <>
@@ -113,16 +113,16 @@ export function OrderDetailPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {params.get("placed") && (
-        <div className="rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 p-8 text-center text-white" role="status">
-          <CheckCircle2 className="mx-auto mb-3 size-14" />
-          <h1 className="text-3xl font-extrabold">Thank you, {o.recipientName?.split(" ")[0]}!</h1>
-          <p className="mt-2 text-emerald-50">Order #{o.id} has been placed. We'll email you when it ships.</p>
+        <div className="rounded-xl border border-line bg-card p-8 sm:p-10" role="status">
+          <CheckCircle2 className="mb-4 size-8 text-emerald-600" strokeWidth={1.5} />
+          <h1 className="text-4xl">Thanks, {o.recipientName?.split(" ")[0]}. Your order's in.</h1>
+          <p className="mt-3 max-w-lg text-ink-2">We've received order #{o.id} and will start packing it today. You'll get an email with tracking as soon as it leaves the warehouse.</p>
         </div>
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link to="/orders" className="text-sm text-ink-3 hover:text-ink">← All orders</Link>
-          <h2 className="mt-1 flex items-center gap-3 text-2xl font-extrabold">Order #{o.id} <StatusBadge status={o.status} /></h2>
+          <h2 className="mt-1 flex items-center gap-3 text-2xl font-medium">Order #{o.id} <StatusBadge status={o.status} /></h2>
           <p className="text-sm text-ink-3">Placed {new Date(o.createdAt).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" })}</p>
         </div>
         {(o.status === "paid" || o.status === "pending") && <Button variant="secondary" onClick={cancel} className="text-rose-600">Cancel order</Button>}

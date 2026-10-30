@@ -1,4 +1,5 @@
-import { Eye, EyeOff, ShoppingCart } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { Logo } from "../components/Logo";
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { Button, Field } from "../components/ui";
@@ -10,10 +11,10 @@ import { useToast } from "../lib/toast";
 /** Centered form on a background image (original design); fields stacked vertically with labels. */
 function AuthShell({ title, sub, children }: { title: string; sub: string; children: React.ReactNode }) {
   return (
-    <div className="-mx-4 -my-8 grid min-h-[78vh] place-items-center bg-cover bg-center px-4 py-12" style={{ backgroundImage: "linear-gradient(rgba(15,23,42,.55),rgba(15,23,42,.55)), url(https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1800&h=1100&fit=crop&auto=format&q=70)" }}>
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-card/95 p-8 shadow-2xl backdrop-blur sm:p-10">
-        <span className="mx-auto mb-5 grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-600/30"><ShoppingCart className="size-6" /></span>
-        <h1 className="text-center text-2xl font-extrabold">{title}</h1>
+    <div className="-mx-4 -my-8 grid min-h-[78vh] place-items-center bg-cover bg-center px-4 py-12" style={{ backgroundImage: "linear-gradient(rgba(31,27,22,.45),rgba(31,27,22,.45)), url(https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1400&h=900&fit=crop&auto=format&q=60)" }}>
+      <div className="w-full max-w-md rounded-xl bg-card p-8 shadow-xl sm:p-10">
+        <div className="mb-6 text-center"><Logo /></div>
+        <h1 className="text-center text-3xl">{title}</h1>
         <p className="mt-1 mb-7 text-center text-sm text-ink-2">{sub}</p>
         {children}
       </div>
@@ -77,7 +78,7 @@ export function LoginPage() {
   if (user && !busy) return <Navigate to={(location.state as { from?: string } | null)?.from ?? "/"} replace />;
   const fill = (e: string, p: string) => (setEmail(e), setPassword(p));
   return (
-    <AuthShell title="Welcome back" sub="Log in to your ShopSphere account">
+    <AuthShell title="Welcome back" sub="Log in to see your orders and saved items.">
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         <PasswordField label="Password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
@@ -88,7 +89,7 @@ export function LoginPage() {
         New here? <Link to="/signup" state={location.state} className="font-semibold text-brand-600 hover:underline">Create an account</Link>
       </p>
       <div className="mt-6 rounded-xl bg-soft p-3 text-xs text-ink-2">
-        <p className="mb-2 font-semibold">Try a demo account</p>
+        <p className="mb-2 font-medium">Just looking around? Use a demo account:</p>
         <div className="flex gap-2">
           <button type="button" onClick={() => fill("demo@shopsphere.dev", "demo12345")} className="flex-1 cursor-pointer rounded-lg border border-line bg-card py-1.5 font-medium hover:border-brand-500">Customer</button>
           <button type="button" onClick={() => fill("admin@shopsphere.dev", "admin12345")} className="flex-1 cursor-pointer rounded-lg border border-line bg-card py-1.5 font-medium hover:border-brand-500">Admin</button>
@@ -110,7 +111,7 @@ export function SignupPage() {
   const bind = (k: keyof typeof form) => ({ value: form[k], onChange: (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value }) });
   const s = strength(form.password);
   return (
-    <AuthShell title="Create your account" sub="Join in seconds, and get 10% off your first order">
+    <AuthShell title="Create your account" sub="It takes a minute, and your first order is 10% off.">
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="Full name" autoComplete="name" required minLength={2} {...bind("name")} />
         <Field label="Email" type="email" autoComplete="email" required {...bind("email")} />

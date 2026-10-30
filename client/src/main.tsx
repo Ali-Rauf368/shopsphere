@@ -40,7 +40,7 @@ function NotFound() {
   useTitle("Page not found");
   return (
     <div className="py-24 text-center">
-      <p className="font-display text-8xl font-extrabold text-brand-600/20">404</p>
+      <p className="font-display text-8xl font-medium text-brand-600/20">404</p>
       <p className="mt-2 text-2xl font-bold">We couldn't find that page</p>
       <p className="mt-2 mb-8 text-ink-2">It may have moved, or the link might be broken.</p>
       <Link to="/" className="rounded-xl bg-brand-600 px-5 py-3 font-semibold text-white hover:bg-brand-700">Back to the shop</Link>

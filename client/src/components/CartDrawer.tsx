@@ -14,10 +14,10 @@ export function FreeShippingMeter({ subtotalCents }: { subtotalCents: number }) 
     <div className="rounded-xl bg-soft p-3 text-sm">
       <p className="mb-2 flex items-center gap-2">
         <Truck className="size-4 text-brand-600 dark:text-brand-400" />
-        {left > 0 ? <>Add <b>{formatPrice(left)}</b> more for free shipping</> : <b className="text-emerald-600 dark:text-emerald-400">You've unlocked free shipping!</b>}
+        {left > 0 ? <>You're <b>{formatPrice(left)}</b> away from free shipping</> : <span>This order ships <b>free</b>.</span>}
       </p>
       <div className="h-1.5 overflow-hidden rounded-full bg-line">
-        <div className="h-full rounded-full bg-gradient-to-r from-brand-500 to-emerald-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+        <div className="h-full rounded-full bg-ink transition-all duration-500" style={{ width: `${pct}%` }} />
       </div>
     </div>
   );
@@ -42,25 +42,25 @@ export function CartDrawer() {
     };
   }, [cartOpen, setCartOpen]);
 
-  const run = (fn: () => Promise<void>) => fn().catch((e: Error) => toast({ kind: "error", title: "Cart not updated", body: e.message }));
+  const run = (fn: () => Promise<void>) => fn().catch((e: Error) => toast({ kind: "error", title: "Couldn't update your bag", body: e.message }));
 
   return (
     <div className={`fixed inset-0 z-[60] ${cartOpen ? "" : "pointer-events-none"}`} aria-hidden={!cartOpen}>
       <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${cartOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setCartOpen(false)} />
       <aside
         role="dialog"
-        aria-label="Shopping cart"
+        aria-label="Your bag"
         className={`absolute inset-y-0 end-0 flex w-full max-w-md flex-col bg-card shadow-2xl transition-transform duration-300 ${cartOpen ? "translate-x-0" : "translate-x-full rtl:-translate-x-full"}`}
       >
         <div className="flex items-center justify-between border-b border-line p-5">
-          <h2 className="text-lg font-bold">Your cart {cart?.itemCount ? <span className="text-ink-3">({cart.itemCount})</span> : null}</h2>
-          <button onClick={() => setCartOpen(false)} className="cursor-pointer rounded-lg p-1.5 hover:bg-soft" aria-label="Close cart"><X className="size-5" /></button>
+          <h2 className="text-lg font-bold">Your bag {cart?.itemCount ? <span className="text-ink-3">({cart.itemCount})</span> : null}</h2>
+          <button onClick={() => setCartOpen(false)} className="cursor-pointer rounded-lg p-1.5 hover:bg-soft" aria-label="Close bag"><X className="size-5" /></button>
         </div>
         {!cart || cart.items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
             <ShoppingBag className="mb-4 size-14 text-ink-3" />
-            <p className="font-semibold">Your cart is empty</p>
-            <p className="mt-1 text-sm text-ink-2">Discover something you'll love.</p>
+            <p className="font-semibold">Your bag is empty</p>
+            <p className="mt-1 text-sm text-ink-2">Have a look around. Anything you add will wait here.</p>
             <button onClick={() => setCartOpen(false)} className="mt-6 cursor-pointer rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">Keep shopping</button>
           </div>
         ) : (
@@ -89,8 +89,8 @@ export function CartDrawer() {
             <div className="space-y-3 border-t border-line p-5">
               <div className="flex justify-between text-base font-semibold"><span>Subtotal</span><span>{formatPrice(cart.subtotalCents)}</span></div>
               <p className="text-xs text-ink-3">Shipping and discounts are calculated at checkout.</p>
-              <Link to="/checkout" className="block rounded-xl bg-brand-600 py-3 text-center font-semibold text-white shadow-lg shadow-brand-600/25 hover:bg-brand-700">Checkout</Link>
-              <Link to="/cart" className="block rounded-xl border border-line py-2.5 text-center text-sm font-semibold hover:bg-soft">View full cart</Link>
+              <Link to="/checkout" className="block rounded-xl bg-brand-600 py-3 text-center font-semibold text-white hover:bg-brand-700">Checkout</Link>
+              <Link to="/cart" className="block rounded-xl border border-line py-2.5 text-center text-sm font-semibold hover:bg-soft">View full bag</Link>
             </div>
           </>
         )}

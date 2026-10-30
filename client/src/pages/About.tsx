@@ -1,4 +1,4 @@
-import { Eye, Heart, Leaf, Mail, MapPin, MessageSquare, Phone, Search, Target, Users } from "lucide-react";
+import { Heart, Leaf, Mail, MapPin, MessageSquare, Phone, Search, Target, Users } from "lucide-react";
 import { useMemo, useState, type FormEvent } from "react";
 import { Stars } from "../components/Stars";
 import { Button, Card, ErrorBox, Field, Loading, PageTitle } from "../components/ui";
@@ -9,26 +9,29 @@ import { useApi } from "../lib/useApi";
 
 export function StoryPage() {
   useTitle("Our story");
-  const stats = [["2019", "Founded"], ["49k+", "Happy customers"], ["6", "Departments"], ["4.6★", "Average rating"]];
   return (
     <div className="space-y-16">
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <div>
           <PageTitle eyebrow="About us" sub="How ShopSphere started">Our story</PageTitle>
           <div className="space-y-4 text-lg leading-relaxed text-ink-2">
-            <p>E-commerce lets people buy and sell over the internet, saving time and effort for customers and businesses alike, and especially for busy people who would rather not spend their evenings in traffic.</p>
-            <p>ShopSphere began with a simple idea: everything you need under one roof, in a range of quality levels, at amazing prices. From phones to frying pans, novels to running shoes, it's all here with a checkout that takes seconds.</p>
-            <p>Today we work with hundreds of suppliers and ship to customers every day, and we still read every review.</p>
+            <p>ShopSphere started in 2019 in a spare room in Springfield. We were tired of scrolling past hundreds of near-identical listings to find one thing that would actually last.</p>
+            <p>So we made the shop we wanted: one place for everyday things, from phones to frying pans and novels to running shoes, where each item has been chosen on purpose and priced fairly.</p>
+            <p>We've moved out of the spare room since, but we still pack orders ourselves and read every review.</p>
           </div>
         </div>
         <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1000&h=800&fit=crop&auto=format&q=80" alt="Inside one of our showrooms" className="rounded-3xl shadow-2xl" />
       </div>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {stats.map(([v, l]) => (
-          <Card key={l} className="p-6 text-center">
-            <p className="font-display text-4xl font-extrabold text-brand-600 dark:text-brand-400">{v}</p>
-            <p className="mt-1 text-sm text-ink-2">{l}</p>
-          </Card>
+      <div className="grid gap-10 border-t border-line pt-12 md:grid-cols-3">
+        {[
+          ["We test before we sell", "Someone on the team lives with every product for a few weeks first. Most candidates don't make it."],
+          ["We keep the range small", "Six departments, a few dozen products. Fewer choices, but each one is a good one."],
+          ["We answer our own email", "Write to hello@shopsphere.dev and one of the five of us will reply, usually the same day."],
+        ].map(([title, text]) => (
+          <div key={title}>
+            <h3 className="text-xl">{title}</h3>
+            <p className="mt-2 leading-relaxed text-ink-2">{text}</p>
+          </div>
         ))}
       </div>
     </div>
@@ -38,23 +41,22 @@ export function StoryPage() {
 export function VisionPage() {
   useTitle("Our vision");
   const pillars = [
-    [Target, "Choice", "A wide catalog across every department, with options for every budget."],
-    [Heart, "Care", "Friendly support, fast delivery and 30-day returns on everything."],
-    [Leaf, "Responsibility", "Recyclable packaging and carbon-neutral shipping by 2028."],
-    [Users, "Community", "Real reviews from real customers shape what we stock."],
+    [Target, "Fewer, better things", "We'd rather stock one kettle we love than ten we're unsure about."],
+    [Heart, "Looking after people", "Free 30-day returns and a real person on the other end of every email."],
+    [Leaf, "Less waste", "Recycled packaging today, and carbon-neutral delivery as our next goal."],
+    [Users, "Listening", "Reviews decide what stays. Products that disappoint get dropped."],
   ] as const;
   return (
     <>
       <PageTitle eyebrow="About us" sub="Where we're headed">Our vision</PageTitle>
-      <Card className="mb-10 flex items-start gap-4 bg-gradient-to-br from-brand-50 to-transparent p-8 dark:from-soft">
-        <Eye className="size-8 shrink-0 text-brand-600 dark:text-brand-400" />
-        <p className="font-display text-2xl leading-snug font-bold">To be the simplest, most trusted place to shop online, where quality and value are never a trade-off.</p>
-      </Card>
+      <blockquote className="mb-14 max-w-3xl border-s-2 border-brand-500 ps-6 font-display text-3xl leading-snug">
+        A shop you can trust to have already done the homework, so buying something good doesn't take an evening of research.
+      </blockquote>
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {pillars.map(([Icon, title, text]) => (
-          <Card key={title} className="p-6 transition hover:-translate-y-1 hover:shadow-lg">
-            <span className="mb-4 grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600 dark:bg-soft dark:text-brand-400"><Icon className="size-6" /></span>
-            <h3 className="text-lg font-bold">{title}</h3>
+          <Card key={title} className="p-6">
+            <Icon className="mb-4 size-6 text-brand-600 dark:text-brand-400" strokeWidth={1.5} />
+            <h3 className="text-xl">{title}</h3>
             <p className="mt-1 text-sm text-ink-2">{text}</p>
           </Card>
         ))}

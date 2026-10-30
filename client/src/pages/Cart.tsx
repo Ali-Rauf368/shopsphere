@@ -8,7 +8,7 @@ import { useStore } from "../lib/store";
 import { useToast } from "../lib/toast";
 
 export function CartPage() {
-  useTitle("Your cart");
+  useTitle("Your bag");
   const { user, ready, cart, setQuantity, removeFromCart } = useStore();
   const toast = useToast();
 
@@ -16,14 +16,14 @@ export function CartPage() {
   if (!user) return <Navigate to="/login" state={{ from: "/cart" }} replace />;
   if (!cart) return <Loading />;
   if (cart.items.length === 0) {
-    return <EmptyState icon={ShoppingBag} title="Your cart is empty" body="Looks like you haven't added anything yet. Let's fix that." action={{ label: "Start shopping", to: "/" }} />;
+    return <EmptyState icon={ShoppingBag} title="Your bag is empty" body="Anything you add will wait here until you're ready." action={{ label: "Browse the shop", to: "/" }} />;
   }
 
-  const run = (fn: () => Promise<void>) => fn().catch((e: Error) => toast({ kind: "error", title: "Cart not updated", body: e.message }));
+  const run = (fn: () => Promise<void>) => fn().catch((e: Error) => toast({ kind: "error", title: "Couldn't update your bag", body: e.message }));
 
   return (
     <>
-      <PageTitle sub={`${cart.itemCount} ${cart.itemCount === 1 ? "item" : "items"}`}>Shopping cart</PageTitle>
+      <PageTitle sub={`${cart.itemCount} ${cart.itemCount === 1 ? "item" : "items"}`}>Your bag</PageTitle>
       <div className="grid gap-8 lg:grid-cols-[1fr_24rem]">
         <Card className="divide-y divide-line">
           {cart.items.map(({ product: p, quantity, lineTotalCents }) => (
@@ -32,7 +32,7 @@ export function CartPage() {
               <div className="flex min-w-0 flex-1 flex-col">
                 <div className="flex justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-brand-600 uppercase dark:text-brand-400">{p.category.name}</p>
+                    <p className="text-xs tracking-wide text-ink-3 uppercase">{p.category.name}</p>
                     <Link to={`/product/${p.slug}`} className="font-semibold hover:text-brand-600">{p.name}</Link>
                     <p className="text-sm text-ink-3">{formatPrice(p.finalPriceCents)} each{p.stock < 10 && <span className="text-amber-600"> · only {p.stock} left</span>}</p>
                   </div>
@@ -56,7 +56,7 @@ export function CartPage() {
             <FreeShippingMeter subtotalCents={cart.subtotalCents} />
             <div className="flex justify-between text-sm"><span className="text-ink-2">Subtotal</span><span className="font-semibold" data-testid="cart-total">{formatPrice(cart.subtotalCents)}</span></div>
             <p className="text-xs text-ink-3">Shipping and coupon codes are applied at checkout.</p>
-            <Link to="/checkout" className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 font-semibold text-white shadow-lg shadow-brand-600/25 hover:bg-brand-700">Proceed to checkout <ArrowRight className="size-4" /></Link>
+            <Link to="/checkout" className="flex items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 font-semibold text-white hover:bg-brand-700">Proceed to checkout <ArrowRight className="size-4" /></Link>
             <p className="flex items-center justify-center gap-1.5 text-xs text-ink-3"><Lock className="size-3.5" /> Secure checkout</p>
           </Card>
         </div>

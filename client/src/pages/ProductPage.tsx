@@ -18,7 +18,7 @@ function ZoomImage({ src, alt }: { src: string; alt: string }) {
     setOrigin(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`);
   };
   return (
-    <div className="aspect-[4/3] cursor-zoom-in overflow-hidden rounded-3xl bg-soft" onMouseMove={onMove} onMouseLeave={() => setOrigin(null)}>
+    <div className="aspect-[4/5] cursor-zoom-in overflow-hidden rounded-xl bg-soft lg:aspect-[5/6]" onMouseMove={onMove} onMouseLeave={() => setOrigin(null)}>
       <img src={src} alt={alt} className="size-full object-cover transition-transform duration-200" style={{ transform: origin ? "scale(1.8)" : "none", transformOrigin: origin ?? "center" }} />
     </div>
   );
@@ -34,7 +34,7 @@ function RatingSummary({ reviews }: { reviews: Review[] }) {
   return (
     <div className="flex items-center gap-6">
       <div className="text-center">
-        <p className="font-display text-5xl font-extrabold">{avg.toFixed(1)}</p>
+        <p className="font-display text-5xl font-medium">{avg.toFixed(1)}</p>
         <Stars value={avg} size={14} />
         <p className="mt-1 text-xs text-ink-3">{reviews.length} {reviews.length === 1 ? "review" : "reviews"}</p>
       </div>
@@ -44,7 +44,7 @@ function RatingSummary({ reviews }: { reviews: Review[] }) {
           return (
             <div key={n} className="flex items-center gap-2 text-xs">
               <span className="w-3 text-ink-2">{n}</span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-soft"><div className="h-full rounded-full bg-amber-400" style={{ width: `${(count / reviews.length) * 100}%` }} /></div>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-soft"><div className="h-full rounded-full bg-ink" style={{ width: `${(count / reviews.length) * 100}%` }} /></div>
               <span className="w-4 text-end text-ink-3">{count}</span>
             </div>
           );
@@ -83,7 +83,7 @@ function ReviewForm({ productId, onDone }: { productId: number; onDone: () => vo
         <div className="flex gap-1" onMouseLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((n) => (
             <button type="button" key={n} onClick={() => setRating(n)} onMouseEnter={() => setHover(n)} className="cursor-pointer transition hover:scale-110" aria-label={`${n} stars`} aria-pressed={rating === n}>
-              <Star className={`size-7 ${n <= (hover || rating) ? "fill-amber-400 text-amber-400" : "text-ink-3/40"}`} />
+              <Star className={`size-7 ${n <= (hover || rating) ? "fill-ink text-ink" : "text-ink-3/40"}`} />
             </button>
           ))}
         </div>
@@ -150,12 +150,12 @@ export function ProductPage() {
         </nav>
         <div className="grid gap-10 lg:grid-cols-2">
           <div className="relative">
-            <ZoomImage src={img(p.imageUrl, 1200)} alt={p.name} />
-            {p.discountPercent > 0 && <span className="absolute start-4 top-4 rounded-full bg-rose-600 px-3 py-1 text-sm font-bold text-white">−{p.discountPercent}%</span>}
+            <ZoomImage src={img(p.imageUrl, 900, 1080)} alt={p.name} />
+            {p.discountPercent > 0 && <span className="absolute start-4 top-4 rounded bg-card px-2 py-1 text-sm font-medium text-brand-700 dark:text-brand-400">−{p.discountPercent}%</span>}
           </div>
           <div className="flex flex-col">
-            <Link to={`/category/${p.category.slug}`} className="text-sm font-semibold tracking-wide text-brand-600 uppercase dark:text-brand-400">{p.category.name}</Link>
-            <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{p.name}</h1>
+            <Link to={`/category/${p.category.slug}`} className="text-xs font-medium tracking-[0.18em] text-brand-600 uppercase dark:text-brand-400">{p.category.name}</Link>
+            <h1 className="mt-2 text-4xl leading-tight sm:text-5xl">{p.name}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
               {p.rating !== null ? (
                 <a href="#reviews" className="flex items-center gap-1.5 hover:text-ink"><Stars value={p.rating} /> {p.rating.toFixed(1)} · {p.reviewCount} {p.reviewCount === 1 ? "review" : "reviews"}</a>
@@ -164,17 +164,17 @@ export function ProductPage() {
             </div>
             <div className="mt-6 flex items-center gap-3">
               <Price cents={p.finalPriceCents} was={p.priceCents} size="lg" />
-              {p.discountPercent > 0 && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">You save ${((p.priceCents - p.finalPriceCents) / 100).toFixed(2)}</span>}
+              {p.discountPercent > 0 && <span className="text-sm text-brand-700 dark:text-brand-400">You save ${((p.priceCents - p.finalPriceCents) / 100).toFixed(2)}</span>}
             </div>
             <p className="mt-5 leading-relaxed text-ink-2">{p.description}</p>
             {p.highlights.length > 0 && (
               <ul className="mt-5 space-y-2">
-                {p.highlights.map((h) => <li key={h} className="flex items-start gap-2.5 text-sm"><Check className="mt-0.5 size-4 shrink-0 text-emerald-500" /> {h}</li>)}
+                {p.highlights.map((h) => <li key={h} className="flex items-start gap-2.5 text-sm"><Check className="mt-0.5 size-4 shrink-0 text-ink-3" /> {h}</li>)}
               </ul>
             )}
-            <p className={`mt-6 flex items-center gap-2 text-sm font-semibold ${p.stock === 0 ? "text-rose-600" : p.stock < 10 ? "text-amber-600" : "text-emerald-600"}`}>
-              <span className={`size-2 rounded-full ${p.stock === 0 ? "bg-rose-500" : p.stock < 10 ? "animate-pulse bg-amber-500" : "bg-emerald-500"}`} />
-              {p.stock === 0 ? "Out of stock" : p.stock < 10 ? `Only ${p.stock} left, order soon` : "In stock, ready to ship"}
+            <p className="mt-6 flex items-center gap-2 text-sm text-ink-2">
+              <span className={`size-1.5 rounded-full ${p.stock === 0 ? "bg-ink-3" : p.stock < 10 ? "bg-brand-500" : "bg-emerald-600"}`} />
+              {p.stock === 0 ? "Sold out. We're restocking soon." : p.stock < 10 ? `Only ${p.stock} left in stock` : "In stock, ships within one working day"}
             </p>
             {p.stock > 0 && (
               <div className="mt-4 flex items-center gap-3">
@@ -189,9 +189,9 @@ export function ProductPage() {
               </div>
             )}
             <Card className="mt-6 divide-y divide-line text-sm">
-              <p className="flex items-center gap-3 p-4"><Truck className="size-5 text-brand-600 dark:text-brand-400" /><span>Arrives <b>{deliveryWindow()}</b>{p.finalPriceCents >= 5000 ? " · free shipping" : ""}</span></p>
-              <p className="flex items-center gap-3 p-4"><RotateCcw className="size-5 text-brand-600 dark:text-brand-400" /> Free 30-day returns</p>
-              <p className="flex items-center gap-3 p-4"><ShieldCheck className="size-5 text-brand-600 dark:text-brand-400" /> 2-year warranty included</p>
+              <p className="flex items-center gap-3 p-4"><Truck className="size-5 text-ink-3" strokeWidth={1.5} /><span>Arrives <b>{deliveryWindow()}</b>{p.finalPriceCents >= 5000 ? " · free shipping" : ""}</span></p>
+              <p className="flex items-center gap-3 p-4"><RotateCcw className="size-5 text-ink-3" strokeWidth={1.5} /> Free 30-day returns</p>
+              <p className="flex items-center gap-3 p-4"><ShieldCheck className="size-5 text-ink-3" strokeWidth={1.5} /> Two-year warranty included</p>
             </Card>
           </div>
         </div>
@@ -199,20 +199,20 @@ export function ProductPage() {
 
       <section id="reviews" className="grid gap-10 lg:grid-cols-[22rem_1fr]">
         <div className="space-y-6">
-          <h2 className="text-2xl font-extrabold">Customer reviews</h2>
+          <h2 className="text-2xl font-medium">Customer reviews</h2>
           {reviews.data && reviews.data.reviews.length > 0 && <RatingSummary reviews={reviews.data.reviews} />}
           {user ? <ReviewForm productId={p.id} onDone={() => (reviews.reload(), reload())} /> : (
             <p className="text-sm text-ink-2"><Link to="/login" state={{ from: `/product/${p.slug}` }} className="font-semibold text-brand-600 hover:underline">Log in</Link> to write a review.</p>
           )}
         </div>
         <div className="space-y-4">
-          {reviews.data?.reviews.length === 0 && <p className="rounded-2xl border border-dashed border-line p-8 text-center text-ink-2">No reviews yet. Be the first to share your thoughts!</p>}
+          {reviews.data?.reviews.length === 0 && <p className="rounded-2xl border border-dashed border-line p-8 text-center text-ink-2">No reviews yet. If you've bought this, tell us what you think.</p>}
           {reviews.data?.reviews.map((r) => (
             <Card key={r.id} className="flex gap-4 p-5">
               <img src={r.avatarUrl} alt="" className="size-12 shrink-0 rounded-full bg-soft" />
               <div>
                 <p className="flex flex-wrap items-center gap-2 font-semibold">{r.authorName} <Stars value={r.rating} size={14} /></p>
-                <p className="text-xs text-ink-3">{new Date(r.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })} · Verified buyer</p>
+                <p className="text-xs text-ink-3">{new Date(r.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })} </p>
                 <p className="mt-2 text-ink-2">{r.comment}</p>
               </div>
             </Card>
@@ -222,13 +222,13 @@ export function ProductPage() {
 
       {related.data && related.data.products.length > 0 && (
         <section>
-          <h2 className="mb-6 text-2xl font-extrabold">You might also like</h2>
+          <h2 className="mb-6 text-2xl font-medium">You might also like</h2>
           <ProductGrid products={related.data.products} />
         </section>
       )}
       {recent.length > 0 && (
         <section>
-          <h2 className="mb-6 text-2xl font-extrabold">Recently viewed</h2>
+          <h2 className="mb-6 text-2xl font-medium">Recently viewed</h2>
           <ProductGrid products={recent} />
         </section>
       )}

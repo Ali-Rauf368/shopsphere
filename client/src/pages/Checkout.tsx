@@ -28,8 +28,8 @@ function Steps({ step }: { step: 1 | 2 }) {
         const done = step > n;
         return (
           <li key={label} className="flex items-center gap-3">
-            {i > 0 && <span className={`h-0.5 w-10 rounded ${step >= n ? "bg-brand-600" : "bg-line"}`} />}
-            <span className={`grid size-8 place-items-center rounded-full ${done ? "bg-emerald-500 text-white" : step === n ? "bg-brand-600 text-white" : "bg-soft text-ink-3"}`}>{done ? <Check className="size-4" /> : n}</span>
+            {i > 0 && <span className={`h-0.5 w-10 rounded ${step >= n ? "bg-ink" : "bg-line"}`} />}
+            <span className={`grid size-8 place-items-center rounded-full ${done ? "bg-ink text-page" : step === n ? "bg-ink text-page" : "bg-soft text-ink-3"}`}>{done ? <Check className="size-4" /> : n}</span>
             <span className={step === n ? "text-ink" : "text-ink-3"}>{label}</span>
           </li>
         );
@@ -189,7 +189,7 @@ export function CheckoutPage() {
             <Card className="p-6">
               <p className="mb-4 font-bold">Payment method</p>
               <div className="grid gap-3 sm:grid-cols-2">
-                {([["card", CreditCard, "Card", "Demo mode: no card is charged"], ["cod", Banknote, "Cash on delivery", "Pay when it arrives"]] as const).map(([v, Icon, label, hint]) => (
+                {([["card", CreditCard, "Card", "This is a demo, so nothing is charged"], ["cod", Banknote, "Cash on delivery", "Pay when it arrives"]] as const).map(([v, Icon, label, hint]) => (
                   <label key={v} className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition ${payment === v ? "border-brand-600 bg-brand-50/50 dark:bg-soft" : "border-line hover:border-ink-3"}`}>
                     <input type="radio" name="payment" checked={payment === v} onChange={() => setPayment(v)} className="sr-only" />
                     <Icon className="size-6 text-brand-600 dark:text-brand-400" />

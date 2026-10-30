@@ -14,34 +14,38 @@
 }
 
 @theme {
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
+  /* One earthy accent ("clay") instead of a tech-indigo; names kept as brand-* so components needn't change. */
+  --color-brand-50: #fbf3ee;
+  --color-brand-100: #f5e1d5;
+  --color-brand-400: #d98a62;
+  --color-brand-500: #c46a3f;
+  --color-brand-600: #a9532c;
+  --color-brand-700: #8a4122;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.875rem;
 }
 
 :root {
-  --page: #f8fafc;
-  --card: #ffffff;
-  --soft: #f1f5f9;
-  --line: #e2e8f0;
-  --ink: #0f172a;
-  --ink-2: #475569;
-  --ink-3: #94a3b8;
+  --page: #f7f4ef;
+  --card: #fffdfa;
+  --soft: #efeae2;
+  --line: #e3ddd3;
+  --ink: #1f1b16;
+  --ink-2: #57504a;
+  --ink-3: #958c82;
   color-scheme: light;
 }
 .dark {
-  --page: #0b1120;
-  --card: #131c2e;
-  --soft: #1e293b;
-  --line: #273449;
-  --ink: #f1f5f9;
-  --ink-2: #cbd5e1;
-  --ink-3: #64748b;
+  --page: #161412;
+  --card: #1e1b18;
+  --soft: #2a2622;
+  --line: #36312c;
+  --ink: #f2ede6;
+  --ink-2: #c9c1b7;
+  --ink-3: #8a8178;
   color-scheme: dark;
 }
 
@@ -50,7 +54,8 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3 { font-family: var(--font-display); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.01em; font-optical-sizing: auto; }
+::selection { background: var(--color-brand-100); color: var(--ink); }
 
 /* Slide caption text drifts in from the left (from the original design). */
 @keyframes slide-in-left {
@@ -86,4 +91,4 @@ h1, h2, h3 { font-family: var(--font-display); }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
-@keyframes grow { from { width: 0; } to { width: 100%; } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
