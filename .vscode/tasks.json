@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start ShopSphere",
+      "detail": "Starts the database, then the API (:4000) and website (:5180)",
+      "type": "shell",
+      "command": "npm run db:start && npm run db:migrate && npm run dev",
+      "group": { "kind": "build", "isDefault": true },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" }
+    },
+    {
+      "label": "Reset demo data",
+      "type": "shell",
+      "command": "npm run db:start && npm run db:seed",
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop database",
+      "type": "shell",
+      "command": "npm run db:stop",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run API tests",
+      "type": "shell",
+      "command": "npm test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run browser tests",
+      "type": "shell",
+      "command": "npm run test:e2e",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}
