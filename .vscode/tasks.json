@@ -6,10 +6,19 @@
       "detail": "Starts the database, then the API (:4000) and website (:5180)",
       "type": "shell",
       "command": "npm run db:start && npm run db:migrate && npm run dev",
-      "group": { "kind": "build", "isDefault": true },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "isBackground": true,
       "problemMatcher": [],
-      "presentation": { "panel": "dedicated", "reveal": "always" }
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
     },
     {
       "label": "Reset demo data",
