@@ -19,7 +19,8 @@ npm install
 npm run db:start      # project-local Postgres 16 on :5433 (data in .pgdata/, no sudo needed)
 npm run db:migrate
 npm run db:seed       # demo catalog, reviews and 30 days of orders
-npm run dev           # API on :4000, web on http://localhost:5180
+npm run dev           # API on :4000, web on http://localhost:5180 (Ctrl+C to stop)
+npm run db:stop       # when you are done
 ```
 
 Demo logins: `demo@shopsphere.dev` / `demo12345` (customer) and `admin@shopsphere.dev` / `admin12345` (admin, sees the dashboard).
