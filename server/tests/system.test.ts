@@ -11,7 +11,7 @@ describe("system", () => {
   it("serves an OpenAPI 3.1 document covering every route group", async () => {
     const res = await api().get("/api/openapi.json").expect(200);
     expect(res.body.openapi).toBe("3.1.0");
-    for (const p of ["/api/auth/login", "/api/products", "/api/cart", "/api/orders", "/api/reviews", "/api/admin/stats"]) {
+    for (const p of ["/api/auth/login", "/api/auth/password", "/api/products", "/api/cart", "/api/cart/quote", "/api/wishlist", "/api/orders", "/api/reviews", "/api/newsletter", "/api/admin/stats"]) {
       expect(res.body.paths).toHaveProperty([p]);
     }
   });

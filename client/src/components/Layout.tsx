@@ -1,34 +1,33 @@
-import { Outlet } from "react-router";
+import { Suspense, useEffect } from "react";
+import { Outlet, useLocation } from "react-router";
+import { CartDrawer } from "./CartDrawer";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import { NavBar } from "./NavBar";
+import { Loading } from "./ui";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [pathname]);
+  return null;
+}
 
 export function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="flex min-h-screen flex-col">
+      <a href="#main" className="sr-only z-[100] rounded-lg bg-brand-600 px-4 py-2 text-white focus:not-sr-only focus:fixed focus:start-4 focus:top-4">Skip to content</a>
+      <ScrollToTop />
       <Header />
       <NavBar />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
-        <Outlet />
+      <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8">
+        <Suspense fallback={<Loading />}>
+          <Outlet />
+        </Suspense>
       </main>
       <Footer />
+      <CartDrawer />
     </div>
   );
-}
-
-export function PageTitle({ children, sub }: { children: React.ReactNode; sub?: string }) {
-  return (
-    <div className="mb-8">
-      <h1 className="text-3xl font-bold tracking-tight">{children}</h1>
-      {sub && <p className="mt-1 text-slate-500">{sub}</p>}
-    </div>
-  );
-}
-
-export function Loading() {
-  return <p className="py-16 text-center text-slate-500">Loading…</p>;
-}
-
-export function ErrorBox({ error }: { error: Error }) {
-  return <p className="rounded-lg bg-red-50 p-4 text-red-700">{error.message}</p>;
 }

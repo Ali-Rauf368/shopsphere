@@ -111,10 +111,12 @@ describe("GET /api/products/:slug", () => {
     expect(p.finalPriceCents).toBe(Math.round((p.priceCents * (100 - p.discountPercent)) / 100));
   });
 
-  it("includes rating aggregates", async () => {
-    const res = await api().get("/api/products/echo-pro-wireless-earbuds").expect(200);
-    expect(res.body.product.reviewCount).toBe(1);
-    expect(res.body.product.rating).toBe(5);
+  it("includes rating aggregates that match the product's reviews", async () => {
+    const { product } = (await api().get("/api/products/echo-pro-wireless-earbuds").expect(200)).body;
+    const { reviews } = (await api().get(`/api/reviews?productId=${product.id}&limit=100`)).body;
+    const avg = reviews.reduce((n: number, r: { rating: number }) => n + r.rating, 0) / reviews.length;
+    expect(product.reviewCount).toBe(reviews.length);
+    expect(product.rating).toBe(Math.round(avg * 10) / 10);
   });
 
   it("404s for unknown slugs", async () => {

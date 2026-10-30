@@ -29,6 +29,7 @@ export const openapi = {
           id: { type: "integer" }, slug: { type: "string" }, name: { type: "string" }, description: { type: "string" },
           priceCents: { type: "integer" }, discountPercent: { type: "integer" }, finalPriceCents: { type: "integer" },
           imageUrl: { type: "string" }, videoUrl: { type: ["string", "null"] }, stock: { type: "integer" }, featured: { type: "boolean" },
+          highlights: { type: "array", items: { type: "string" } }, soldCount: { type: "integer" },
           category: { type: "object", properties: { id: { type: "integer" }, slug: { type: "string" }, name: { type: "string" } } },
           rating: { type: ["number", "null"] }, reviewCount: { type: "integer" },
         },
@@ -39,7 +40,15 @@ export const openapi = {
         properties: {
           slug: { type: "string" }, name: { type: "string" }, description: { type: "string" }, priceCents: { type: "integer" },
           discountPercent: { type: "integer" }, imageUrl: { type: "string" }, videoUrl: { type: ["string", "null"] },
-          stock: { type: "integer" }, featured: { type: "boolean" }, categoryId: { type: "integer" },
+          stock: { type: "integer" }, featured: { type: "boolean" }, highlights: { type: "array", items: { type: "string" } }, categoryId: { type: "integer" },
+        },
+      },
+      Quote: {
+        type: "object",
+        properties: {
+          subtotalCents: { type: "integer" }, discountCents: { type: "integer" }, shippingCents: { type: "integer" }, totalCents: { type: "integer" },
+          freeShippingThresholdCents: { type: "integer" },
+          coupon: { type: ["object", "null"], properties: { code: { type: "string" }, description: { type: "string" }, percentOff: { type: "integer" } } },
         },
       },
       Cart: {
@@ -52,7 +61,10 @@ export const openapi = {
       Order: {
         type: "object",
         properties: {
-          id: { type: "integer" }, status: { enum: ["pending", "paid", "shipped", "delivered", "cancelled"] }, totalCents: { type: "integer" },
+          id: { type: "integer" }, status: { enum: ["pending", "paid", "shipped", "delivered", "cancelled"] },
+          recipientName: { type: ["string", "null"] }, phone: { type: ["string", "null"] }, couponCode: { type: ["string", "null"] },
+          subtotalCents: { type: "integer" }, discountCents: { type: "integer" }, shippingCents: { type: "integer" }, totalCents: { type: "integer" },
+          events: { type: "array", items: { type: "object", properties: { status: { type: "string" }, at: { type: "string", format: "date-time" } } } },
           shippingAddress: { type: "string" }, createdAt: { type: "string", format: "date-time" }, items: { type: "array", items: { type: "object" } },
         },
       },
@@ -81,7 +93,17 @@ export const openapi = {
         responses: { "200": ok("Logged in", ref("AuthResponse")), ...errors },
       },
     },
-    "/api/auth/me": { get: { tags: ["Auth"], summary: "Current user", security: secured, responses: { "200": ok("User"), ...errors } } },
+    "/api/auth/me": {
+      get: { tags: ["Auth"], summary: "Current user", security: secured, responses: { "200": ok("User"), ...errors } },
+      patch: { tags: ["Auth"], summary: "Update display name", security: secured, requestBody: body({ type: "object", required: ["name"], properties: { name: { type: "string" } } }), responses: { "200": ok("User"), ...errors } },
+    },
+    "/api/auth/password": {
+      post: {
+        tags: ["Auth"], summary: "Change password", security: secured,
+        requestBody: body({ type: "object", required: ["currentPassword", "newPassword"], properties: { currentPassword: { type: "string" }, newPassword: { type: "string", minLength: 8 } } }),
+        responses: { "204": ok("Changed"), ...errors },
+      },
+    },
     "/api/categories": { get: { tags: ["Catalog"], summary: "Navigation tree", responses: { "200": ok("Categories") } } },
     "/api/categories/{slug}": {
       get: { tags: ["Catalog"], summary: "One category", parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }], responses: { "200": ok("Category"), "404": ok("Not found", ref("Error")) } },
@@ -89,13 +111,16 @@ export const openapi = {
     "/api/products": {
       get: {
         tags: ["Catalog"], summary: "Search and filter products",
-        parameters: ["q", "category", "featured", "offers", "minPrice", "maxPrice", "sort", "page", "pageSize"].map((name) => ({ name, in: "query", schema: { type: "string" } })),
+        parameters: ["q", "category", "featured", "offers", "inStock", "minRating", "minPrice", "maxPrice", "sort", "page", "pageSize"].map((name) => ({ name, in: "query", schema: { type: "string" } })),
         responses: { "200": ok("Paged products", { type: "object", properties: { products: { type: "array", items: ref("Product") }, total: { type: "integer" }, page: { type: "integer" }, pageSize: { type: "integer" } } }) },
       },
       post: { tags: ["Admin"], summary: "Create product", security: secured, requestBody: body(ref("ProductInput")), responses: { "201": ok("Created"), "403": ok("Forbidden", ref("Error")), ...errors } },
     },
     "/api/products/{slug}": {
       get: { tags: ["Catalog"], summary: "Product by slug", parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }], responses: { "200": ok("Product"), "404": ok("Not found", ref("Error")) } },
+    },
+    "/api/products/{slug}/related": {
+      get: { tags: ["Catalog"], summary: "Related products", parameters: [{ name: "slug", in: "path", required: true, schema: { type: "string" } }], responses: { "200": ok("Products"), "404": ok("Not found", ref("Error")) } },
     },
     "/api/products/{id}": {
       patch: { tags: ["Admin"], summary: "Update product", security: secured, parameters: [idParam()], requestBody: body(ref("ProductInput")), responses: { "200": ok("Updated"), "404": ok("Not found", ref("Error")), ...errors } },
@@ -104,6 +129,14 @@ export const openapi = {
     "/api/cart": {
       get: { tags: ["Cart"], summary: "Get cart", security: secured, responses: { "200": ok("Cart", ref("Cart")), ...errors } },
       delete: { tags: ["Cart"], summary: "Empty cart", security: secured, responses: { "204": ok("Emptied"), ...errors } },
+    },
+    "/api/cart/quote": {
+      get: { tags: ["Cart"], summary: "Price breakdown with shipping and optional coupon", security: secured, parameters: [{ name: "coupon", in: "query", schema: { type: "string" } }], responses: { "200": ok("Quote", ref("Quote")), ...errors } },
+    },
+    "/api/wishlist": { get: { tags: ["Wishlist"], summary: "My wishlist", security: secured, responses: { "200": ok("Products"), ...errors } } },
+    "/api/wishlist/{productId}": {
+      put: { tags: ["Wishlist"], summary: "Save a product", security: secured, parameters: [idParam("productId")], responses: { "200": ok("Products"), "404": ok("Not found", ref("Error")), ...errors } },
+      delete: { tags: ["Wishlist"], summary: "Remove a product", security: secured, parameters: [idParam("productId")], responses: { "200": ok("Products"), ...errors } },
     },
     "/api/cart/items": {
       post: {
@@ -120,7 +153,7 @@ export const openapi = {
       get: { tags: ["Orders"], summary: "My orders", security: secured, responses: { "200": ok("Orders"), ...errors } },
       post: {
         tags: ["Orders"], summary: "Check out the cart", security: secured,
-        requestBody: body({ type: "object", required: ["shippingAddress"], properties: { shippingAddress: { type: "string" } } }),
+        requestBody: body({ type: "object", required: ["shippingAddress"], properties: { shippingAddress: { type: "string" }, recipientName: { type: "string" }, phone: { type: "string" }, couponCode: { type: "string" } } }),
         responses: { "201": ok("Order", { type: "object", properties: { order: ref("Order") } }), "409": ok("Out of stock", ref("Error")), ...errors },
       },
     },
@@ -140,6 +173,9 @@ export const openapi = {
         requestBody: body({ type: "object", required: ["name", "email", "message"], properties: { name: { type: "string" }, email: { type: "string" }, message: { type: "string" } } }),
         responses: { "201": ok("Received"), ...errors },
       },
+    },
+    "/api/newsletter": {
+      post: { tags: ["Contact"], summary: "Subscribe to the newsletter", requestBody: body({ type: "object", required: ["email"], properties: { email: { type: "string" } } }), responses: { "201": ok("Subscribed"), ...errors } },
     },
     "/api/admin/stats": { get: { tags: ["Admin"], summary: "Dashboard stats", security: secured, responses: { "200": ok("Stats"), "403": ok("Forbidden", ref("Error")) } } },
     "/api/admin/orders": { get: { tags: ["Admin"], summary: "All orders", security: secured, responses: { "200": ok("Orders") } } },

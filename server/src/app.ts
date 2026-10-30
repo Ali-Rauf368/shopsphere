@@ -9,13 +9,15 @@ import admin from "./routes/admin.js";
 import auth from "./routes/auth.js";
 import cart from "./routes/cart.js";
 import categories from "./routes/categories.js";
-import contact from "./routes/contact.js";
+import contact, { newsletter } from "./routes/contact.js";
 import orders from "./routes/orders.js";
 import products from "./routes/products.js";
 import reviews from "./routes/reviews.js";
+import wishlist from "./routes/wishlist.js";
 
 export function createApp() {
   const app = express();
+  if (config.trustProxy) app.set("trust proxy", /^\d+$/.test(config.trustProxy) ? Number(config.trustProxy) : config.trustProxy);
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(cors({ origin: config.clientOrigin }));
   app.use(express.json({ limit: "100kb" }));
@@ -35,6 +37,8 @@ export function createApp() {
   app.use("/api/orders", orders);
   app.use("/api/reviews", reviews);
   app.use("/api/contact", contact);
+  app.use("/api/newsletter", newsletter);
+  app.use("/api/wishlist", wishlist);
   app.use("/api/admin", admin);
 
   app.use(notFoundHandler);

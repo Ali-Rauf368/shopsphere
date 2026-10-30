@@ -17,6 +17,8 @@ export interface Product {
   videoUrl: string | null;
   stock: number;
   featured: boolean;
+  highlights: string[];
+  soldCount: number;
   category: { id: number; slug: string; name: string };
   rating: number | null;
   reviewCount: number;
@@ -35,13 +37,38 @@ export interface Cart {
   subtotalCents: number;
 }
 
+export type OrderStatus = "pending" | "paid" | "shipped" | "delivered" | "cancelled";
+
 export interface Order {
   id: number;
-  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
+  status: OrderStatus;
+  recipientName: string | null;
+  phone: string | null;
+  subtotalCents: number;
+  discountCents: number;
+  shippingCents: number;
+  couponCode: string | null;
   totalCents: number;
   shippingAddress: string;
   createdAt: string;
   items: { productId: number; name: string; slug: string; imageUrl: string; quantity: number; unitPriceCents: number }[];
+  events: { status: OrderStatus; at: string }[];
+}
+
+export interface Quote {
+  subtotalCents: number;
+  discountCents: number;
+  shippingCents: number;
+  totalCents: number;
+  freeShippingThresholdCents: number;
+  coupon: { code: string; description: string; percentOff: number } | null;
+}
+
+export interface Paged<T> {
+  products: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface Review {
@@ -91,6 +118,15 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     throw new ApiError(res.status, firstIssue ? `${data.error}: ${firstIssue}` : (data.error ?? res.statusText), data.details);
   }
   return data as T;
+}
+
+/** Resizes an Unsplash image URL; other URLs pass through unchanged. */
+export function img(url: string, w: number, h = Math.round((w * 3) / 4)) {
+  if (!url.startsWith("https://images.unsplash.com/")) return url;
+  const u = new URL(url);
+  u.searchParams.set("w", String(w));
+  u.searchParams.set("h", String(h));
+  return u.toString();
 }
 
 export const formatPrice = (cents: number) =>

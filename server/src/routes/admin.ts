@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { z } from "zod";
-import { query } from "../db.js";
+import { query, withTransaction } from "../db.js";
 import { notFound } from "../lib/http-error.js";
 import { requireAdmin } from "../middleware/auth.js";
-import { loadOrder } from "./orders.js";
+import { loadOrder, ORDER_STATUSES } from "./orders.js";
 
 const router = Router();
 router.use(requireAdmin);
@@ -54,9 +54,14 @@ router.get("/orders", async (_req, res) => {
 
 router.patch("/orders/:id", async (req, res) => {
   const id = z.coerce.number().int().positive().parse(req.params.id);
-  const { status } = z.object({ status: z.enum(["pending", "paid", "shipped", "delivered", "cancelled"]) }).parse(req.body);
-  const updated = await query("UPDATE orders SET status = $2 WHERE id = $1 RETURNING id", [id, status]);
-  if (!updated.length) throw notFound("Order");
+  const { status } = z.object({ status: z.enum(ORDER_STATUSES) }).parse(req.body);
+  await withTransaction(async (client) => {
+    const { rows } = await client.query<{ status: string }>("SELECT status FROM orders WHERE id = $1 FOR UPDATE", [id]);
+    if (!rows[0]) throw notFound("Order");
+    if (rows[0].status === status) return;
+    await client.query("UPDATE orders SET status = $2 WHERE id = $1", [id, status]);
+    await client.query("INSERT INTO order_events (order_id, status) VALUES ($1, $2)", [id, status]);
+  });
   res.json({ order: await loadOrder(id) });
 });
 

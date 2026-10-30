@@ -2,6 +2,8 @@ import { Router } from "express";
 import { z } from "zod";
 import { query } from "../db.js";
 import { HttpError, notFound } from "../lib/http-error.js";
+import { findCoupon, quote } from "../lib/pricing.js";
+import { pool } from "../db.js";
 import { PRODUCT_SELECT, serializeProduct, type ProductRow } from "../lib/serialize.js";
 import { currentUser, requireAuth } from "../middleware/auth.js";
 
@@ -33,6 +35,14 @@ const itemSchema = z.object({
 
 router.get("/", async (req, res) => {
   res.json(await loadCart(currentUser(req).id));
+});
+
+/** Price breakdown for the current cart, optionally with a coupon. An invalid coupon is a 400 with the reason. */
+router.get("/quote", async (req, res) => {
+  const { coupon } = z.object({ coupon: z.string().trim().max(40).optional() }).parse(req.query);
+  const cart = await loadCart(currentUser(req).id);
+  const applied = coupon ? await findCoupon(pool, coupon, cart.subtotalCents) : null;
+  res.json(quote(cart.subtotalCents, applied));
 });
 
 /** Adds to the existing quantity. */

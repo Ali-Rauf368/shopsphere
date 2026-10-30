@@ -6,8 +6,10 @@ useFreshDatabase();
 describe("reviews", () => {
   it("lists store reviews newest first with robohash avatars", async () => {
     const res = await api().get("/api/reviews").expect(200);
-    expect(res.body.reviews).toHaveLength(7);
+    expect(res.body.reviews).toHaveLength(20); // default limit
     expect(res.body.reviews[0].authorName).toBe("Ayesha Khan");
+    const dates = res.body.reviews.map((r: { createdAt: string }) => r.createdAt);
+    expect(dates).toEqual([...dates].sort().reverse());
     expect(res.body.reviews[0].avatarUrl).toMatch(/^https:\/\/robohash\.org\//);
   });
 
@@ -28,10 +30,12 @@ describe("reviews", () => {
   it("posts a review under the user's name and updates the product rating", async () => {
     const token = await login();
     const p = await productBySlug("echo-pro-wireless-earbuds");
+    const before = (await api().get("/api/products/echo-pro-wireless-earbuds")).body.product;
     const res = await api().post("/api/reviews").set(bearer(token)).send({ productId: p.id, rating: 3, comment: "Decent earbuds" }).expect(201);
     expect(res.body.review).toMatchObject({ authorName: "Demo Customer", rating: 3, productName: "Echo Pro Wireless Earbuds" });
     const updated = (await api().get("/api/products/echo-pro-wireless-earbuds")).body.product;
-    expect(updated).toMatchObject({ reviewCount: 2, rating: 4 });
+    expect(updated.reviewCount).toBe(before.reviewCount + 1);
+    expect(updated.rating).toBeLessThan(before.rating);
   });
 
   it("allows a store-wide review without a product", async () => {

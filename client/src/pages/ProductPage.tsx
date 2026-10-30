@@ -1,108 +1,245 @@
-import { Minus, Plus, Star } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { Check, ChevronRight, Minus, Plus, RotateCcw, Share2, ShieldCheck, Star, Truck } from "lucide-react";
+import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
 import { Link, useParams } from "react-router";
-import { AddToCartButton } from "../components/AddToCartButton";
-import { ErrorBox, Loading } from "../components/Layout";
+import { AddToCartButton, ProductGrid, WishlistButton } from "../components/ProductCard";
 import { Stars } from "../components/Stars";
-import { api, formatPrice, type Product, type Review } from "../lib/api";
+import { Button, Card, ErrorBox, Price, Skeleton } from "../components/ui";
+import { api, img, type Product, type Review } from "../lib/api";
+import { recentlyViewed, useTitle } from "../lib/hooks";
 import { useStore } from "../lib/store";
+import { useToast } from "../lib/toast";
 import { useApi } from "../lib/useApi";
 
+/** Image that zooms toward the cursor on hover. */
+function ZoomImage({ src, alt }: { src: string; alt: string }) {
+  const [origin, setOrigin] = useState<string | null>(null);
+  const onMove = (e: MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setOrigin(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`);
+  };
+  return (
+    <div className="aspect-[4/3] cursor-zoom-in overflow-hidden rounded-3xl bg-soft" onMouseMove={onMove} onMouseLeave={() => setOrigin(null)}>
+      <img src={src} alt={alt} className="size-full object-cover transition-transform duration-200" style={{ transform: origin ? "scale(1.8)" : "none", transformOrigin: origin ?? "center" }} />
+    </div>
+  );
+}
+
+function deliveryWindow() {
+  const fmt = (d: number) => new Date(Date.now() + d * 86_400_000).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  return `${fmt(2)} – ${fmt(4)}`;
+}
+
+function RatingSummary({ reviews }: { reviews: Review[] }) {
+  const avg = reviews.reduce((n, r) => n + r.rating, 0) / reviews.length;
+  return (
+    <div className="flex items-center gap-6">
+      <div className="text-center">
+        <p className="font-display text-5xl font-extrabold">{avg.toFixed(1)}</p>
+        <Stars value={avg} size={14} />
+        <p className="mt-1 text-xs text-ink-3">{reviews.length} {reviews.length === 1 ? "review" : "reviews"}</p>
+      </div>
+      <div className="flex-1 space-y-1.5">
+        {[5, 4, 3, 2, 1].map((n) => {
+          const count = reviews.filter((r) => r.rating === n).length;
+          return (
+            <div key={n} className="flex items-center gap-2 text-xs">
+              <span className="w-3 text-ink-2">{n}</span>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-soft"><div className="h-full rounded-full bg-amber-400" style={{ width: `${(count / reviews.length) * 100}%` }} /></div>
+              <span className="w-4 text-end text-ink-3">{count}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function ReviewForm({ productId, onDone }: { productId: number; onDone: () => void }) {
-  const [rating, setRating] = useState(5);
+  const toast = useToast();
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!rating) return toast({ kind: "error", title: "Pick a star rating first" });
+    setBusy(true);
     try {
       await api("/reviews", { method: "POST", body: { productId, rating, comment } });
       setComment("");
+      setRating(0);
+      toast({ kind: "success", title: "Thanks for your review!" });
       onDone();
     } catch (err) {
-      setError((err as Error).message);
+      toast({ kind: "error", title: "Review not posted", body: (err as Error).message });
+    } finally {
+      setBusy(false);
     }
   };
   return (
-    <form onSubmit={submit} className="space-y-3 rounded-xl bg-white p-5 shadow-sm">
-      <p className="font-semibold">Write a review</p>
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((n) => (
-          <button type="button" key={n} onClick={() => setRating(n)} className="cursor-pointer" aria-label={`${n} stars`}>
-            <Star className={`size-6 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`} />
-          </button>
-        ))}
-      </div>
-      <textarea value={comment} onChange={(e) => setComment(e.target.value)} required minLength={3} rows={3} placeholder="What did you think?" className="w-full rounded-lg border border-slate-300 p-3 text-sm" />
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button className="cursor-pointer rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">Submit</button>
-    </form>
+    <Card className="p-5">
+      <form onSubmit={submit} className="space-y-3">
+        <p className="font-semibold">Write a review</p>
+        <div className="flex gap-1" onMouseLeave={() => setHover(0)}>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button type="button" key={n} onClick={() => setRating(n)} onMouseEnter={() => setHover(n)} className="cursor-pointer transition hover:scale-110" aria-label={`${n} stars`} aria-pressed={rating === n}>
+              <Star className={`size-7 ${n <= (hover || rating) ? "fill-amber-400 text-amber-400" : "text-ink-3/40"}`} />
+            </button>
+          ))}
+        </div>
+        <textarea value={comment} onChange={(e) => setComment(e.target.value)} required minLength={3} rows={3} placeholder="What did you think?" className="w-full rounded-xl border border-line bg-card p-3 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15" />
+        <Button busy={busy}>Submit</Button>
+      </form>
+    </Card>
+  );
+}
+
+function ProductSkeleton() {
+  return (
+    <div className="grid gap-10 md:grid-cols-2">
+      <Skeleton className="aspect-[4/3] rounded-3xl" />
+      <div className="space-y-4"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-3/4" /><Skeleton className="h-6 w-40" /><Skeleton className="h-24 w-full" /><Skeleton className="h-12 w-full" /></div>
+    </div>
   );
 }
 
 export function ProductPage() {
   const { slug = "" } = useParams();
   const { user } = useStore();
+  const toast = useToast();
   const { data, error, loading, reload } = useApi<{ product: Product }>(`/products/${slug}`);
-  const productId = data?.product.id;
-  const reviews = useApi<{ reviews: Review[] }>(productId ? `/reviews?productId=${productId}` : null);
+  const p = data?.product;
+  useTitle(p?.name);
+  const reviews = useApi<{ reviews: Review[] }>(p ? `/reviews?productId=${p.id}&limit=50` : null);
+  const related = useApi<{ products: Product[] }>(`/products/${slug}/related`);
   const [qty, setQty] = useState(1);
+  const [recent, setRecent] = useState<Product[]>([]);
 
-  if (loading && !data) return <Loading />;
+  useEffect(() => {
+    setQty(1);
+  }, [slug]);
+  useEffect(() => {
+    if (!p) return;
+    setRecent(recentlyViewed.get().filter((x) => x.id !== p.id).slice(0, 4));
+    recentlyViewed.push(p);
+  }, [p]);
+
   if (error) return <ErrorBox error={error} />;
-  if (!data) return null;
-  const p = data.product;
+  if (loading && !p) return <ProductSkeleton />;
+  if (!p) return null;
+
+  const share = async () => {
+    try {
+      if (navigator.share) await navigator.share({ title: p.name, url: location.href });
+      else {
+        await navigator.clipboard.writeText(location.href);
+        toast({ kind: "success", title: "Link copied" });
+      }
+    } catch {
+      // User dismissed the share sheet.
+    }
+  };
 
   return (
-    <div className="space-y-12">
-      <nav className="text-sm text-slate-500">
-        <Link to="/" className="hover:underline">Home</Link> / <Link to={`/category/${p.category.slug}`} className="hover:underline">{p.category.name}</Link> / {p.name}
-      </nav>
-      <div className="grid gap-10 md:grid-cols-2">
-        <img src={p.imageUrl.replace("/600/450", "/900/675")} alt={p.name} className="w-full rounded-2xl object-cover shadow" />
-        <div className="space-y-5">
-          <h1 className="text-3xl font-bold">{p.name}</h1>
-          {p.rating !== null && (
-            <div className="flex items-center gap-2 text-sm text-slate-500"><Stars value={p.rating} /> {p.rating} · {p.reviewCount} reviews</div>
-          )}
-          <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold">{formatPrice(p.finalPriceCents)}</span>
-            {p.discountPercent > 0 && (
-              <>
-                <span className="text-lg text-slate-400 line-through">{formatPrice(p.priceCents)}</span>
-                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-sm font-semibold text-rose-700">Save {p.discountPercent}%</span>
-              </>
-            )}
+    <div className="space-y-16 pb-20 md:pb-0">
+      <div>
+        <nav className="mb-6 flex flex-wrap items-center gap-1 text-sm text-ink-3" aria-label="Breadcrumb">
+          <Link to="/" className="hover:text-ink">Home</Link><ChevronRight className="size-3.5" />
+          <Link to={`/category/${p.category.slug}`} className="hover:text-ink">{p.category.name}</Link><ChevronRight className="size-3.5" />
+          <span className="text-ink-2">{p.name}</span>
+        </nav>
+        <div className="grid gap-10 lg:grid-cols-2">
+          <div className="relative">
+            <ZoomImage src={img(p.imageUrl, 1200)} alt={p.name} />
+            {p.discountPercent > 0 && <span className="absolute start-4 top-4 rounded-full bg-rose-600 px-3 py-1 text-sm font-bold text-white">−{p.discountPercent}%</span>}
           </div>
-          <p className="leading-relaxed text-slate-600">{p.description}</p>
-          <p className={`text-sm font-medium ${p.stock < 10 ? "text-amber-600" : "text-emerald-600"}`}>
-            {p.stock === 0 ? "Out of stock" : p.stock < 10 ? `Only ${p.stock} left` : "In stock"}
-          </p>
-          {p.stock > 0 && (
-            <div className="flex items-center gap-4">
-              <div className="flex items-center rounded-lg border border-slate-300 bg-white">
-                <button onClick={() => setQty(Math.max(1, qty - 1))} className="cursor-pointer p-2.5" aria-label="Decrease"><Minus className="size-4" /></button>
-                <span className="w-10 text-center" data-testid="qty">{qty}</span>
-                <button onClick={() => setQty(Math.min(p.stock, qty + 1))} className="cursor-pointer p-2.5" aria-label="Increase"><Plus className="size-4" /></button>
-              </div>
-              <AddToCartButton product={p} quantity={qty} className="flex-1" />
+          <div className="flex flex-col">
+            <Link to={`/category/${p.category.slug}`} className="text-sm font-semibold tracking-wide text-brand-600 uppercase dark:text-brand-400">{p.category.name}</Link>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">{p.name}</h1>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-2">
+              {p.rating !== null ? (
+                <a href="#reviews" className="flex items-center gap-1.5 hover:text-ink"><Stars value={p.rating} /> {p.rating.toFixed(1)} · {p.reviewCount} {p.reviewCount === 1 ? "review" : "reviews"}</a>
+              ) : <span>No reviews yet</span>}
+              {p.soldCount > 0 && <span>{p.soldCount} sold recently</span>}
             </div>
-          )}
+            <div className="mt-6 flex items-center gap-3">
+              <Price cents={p.finalPriceCents} was={p.priceCents} size="lg" />
+              {p.discountPercent > 0 && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">You save ${((p.priceCents - p.finalPriceCents) / 100).toFixed(2)}</span>}
+            </div>
+            <p className="mt-5 leading-relaxed text-ink-2">{p.description}</p>
+            {p.highlights.length > 0 && (
+              <ul className="mt-5 space-y-2">
+                {p.highlights.map((h) => <li key={h} className="flex items-start gap-2.5 text-sm"><Check className="mt-0.5 size-4 shrink-0 text-emerald-500" /> {h}</li>)}
+              </ul>
+            )}
+            <p className={`mt-6 flex items-center gap-2 text-sm font-semibold ${p.stock === 0 ? "text-rose-600" : p.stock < 10 ? "text-amber-600" : "text-emerald-600"}`}>
+              <span className={`size-2 rounded-full ${p.stock === 0 ? "bg-rose-500" : p.stock < 10 ? "animate-pulse bg-amber-500" : "bg-emerald-500"}`} />
+              {p.stock === 0 ? "Out of stock" : p.stock < 10 ? `Only ${p.stock} left, order soon` : "In stock, ready to ship"}
+            </p>
+            {p.stock > 0 && (
+              <div className="mt-4 flex items-center gap-3">
+                <div className="flex items-center rounded-xl border border-line bg-card">
+                  <button onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1} className="cursor-pointer p-3 disabled:opacity-30" aria-label="Decrease"><Minus className="size-4" /></button>
+                  <span className="w-8 text-center font-semibold" data-testid="qty">{qty}</span>
+                  <button onClick={() => setQty(Math.min(p.stock, qty + 1))} disabled={qty >= p.stock} className="cursor-pointer p-3 disabled:opacity-30" aria-label="Increase"><Plus className="size-4" /></button>
+                </div>
+                <AddToCartButton product={p} quantity={qty} className="flex-1 py-3.5" />
+                <WishlistButton product={p} className="size-12 border border-line !bg-card !text-ink" />
+                <button onClick={share} className="grid size-12 cursor-pointer place-items-center rounded-full border border-line hover:bg-soft" aria-label="Share"><Share2 className="size-[18px]" /></button>
+              </div>
+            )}
+            <Card className="mt-6 divide-y divide-line text-sm">
+              <p className="flex items-center gap-3 p-4"><Truck className="size-5 text-brand-600 dark:text-brand-400" /><span>Arrives <b>{deliveryWindow()}</b>{p.finalPriceCents >= 5000 ? " · free shipping" : ""}</span></p>
+              <p className="flex items-center gap-3 p-4"><RotateCcw className="size-5 text-brand-600 dark:text-brand-400" /> Free 30-day returns</p>
+              <p className="flex items-center gap-3 p-4"><ShieldCheck className="size-5 text-brand-600 dark:text-brand-400" /> 2-year warranty included</p>
+            </Card>
+          </div>
         </div>
       </div>
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold">Reviews</h2>
-        {reviews.data?.reviews.length === 0 && <p className="text-slate-500">No reviews yet.</p>}
-        {reviews.data?.reviews.map((r) => (
-          <div key={r.id} className="flex gap-4 rounded-xl bg-white p-5 shadow-sm">
-            <img src={r.avatarUrl} alt="" className="size-12 rounded-full bg-slate-100" />
-            <div>
-              <p className="font-semibold">{r.authorName} <span className="ms-2"><Stars value={r.rating} size={14} /></span></p>
-              <p className="mt-1 text-slate-600">{r.comment}</p>
-            </div>
-          </div>
-        ))}
-        {user && productId && <ReviewForm productId={productId} onDone={() => { reviews.reload(); reload(); }} />}
+
+      <section id="reviews" className="grid gap-10 lg:grid-cols-[22rem_1fr]">
+        <div className="space-y-6">
+          <h2 className="text-2xl font-extrabold">Customer reviews</h2>
+          {reviews.data && reviews.data.reviews.length > 0 && <RatingSummary reviews={reviews.data.reviews} />}
+          {user ? <ReviewForm productId={p.id} onDone={() => (reviews.reload(), reload())} /> : (
+            <p className="text-sm text-ink-2"><Link to="/login" state={{ from: `/product/${p.slug}` }} className="font-semibold text-brand-600 hover:underline">Log in</Link> to write a review.</p>
+          )}
+        </div>
+        <div className="space-y-4">
+          {reviews.data?.reviews.length === 0 && <p className="rounded-2xl border border-dashed border-line p-8 text-center text-ink-2">No reviews yet. Be the first to share your thoughts!</p>}
+          {reviews.data?.reviews.map((r) => (
+            <Card key={r.id} className="flex gap-4 p-5">
+              <img src={r.avatarUrl} alt="" className="size-12 shrink-0 rounded-full bg-soft" />
+              <div>
+                <p className="flex flex-wrap items-center gap-2 font-semibold">{r.authorName} <Stars value={r.rating} size={14} /></p>
+                <p className="text-xs text-ink-3">{new Date(r.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })} · Verified buyer</p>
+                <p className="mt-2 text-ink-2">{r.comment}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
       </section>
+
+      {related.data && related.data.products.length > 0 && (
+        <section>
+          <h2 className="mb-6 text-2xl font-extrabold">You might also like</h2>
+          <ProductGrid products={related.data.products} />
+        </section>
+      )}
+      {recent.length > 0 && (
+        <section>
+          <h2 className="mb-6 text-2xl font-extrabold">Recently viewed</h2>
+          <ProductGrid products={recent} />
+        </section>
+      )}
+
+      {/* Sticky buy bar on small screens */}
+      {p.stock > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-line bg-card/95 p-3 backdrop-blur md:hidden">
+          <Price cents={p.finalPriceCents} />
+          <AddToCartButton product={p} quantity={qty} className="flex-1" />
+        </div>
+      )}
     </div>
   );
 }

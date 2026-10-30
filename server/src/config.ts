@@ -12,4 +12,8 @@ export const config = {
   port: Number(process.env.PORT ?? 4000),
   clientOrigin: process.env.CLIENT_ORIGIN ?? "http://localhost:5180",
   bcryptRounds: Number(process.env.BCRYPT_ROUNDS ?? 12),
+  /** Login/signup attempts allowed per IP per 15 minutes. */
+  /** Set when running behind a reverse proxy so rate limiting sees real client IPs (e.g. "1" or "loopback"). */
+  trustProxy: process.env.TRUST_PROXY,
+  authRateLimit: Number(process.env.AUTH_RATE_LIMIT ?? 20),
 };

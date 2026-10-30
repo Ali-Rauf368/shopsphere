@@ -15,6 +15,15 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(err.status).json({ error: err.message, ...(err.details ? { details: err.details } : {}) });
     return;
   }
+  // PostgreSQL constraint violations that a client can cause.
+  if (err?.code === "23505") {
+    res.status(409).json({ error: "A record with this value already exists", details: err.detail });
+    return;
+  }
+  if (err?.code === "23503") {
+    res.status(400).json({ error: "Referenced record does not exist", details: err.detail });
+    return;
+  }
   if (err?.type === "entity.parse.failed") {
     res.status(400).json({ error: "Malformed JSON body" });
     return;

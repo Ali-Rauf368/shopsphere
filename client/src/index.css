@@ -1,13 +1,56 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Semantic colour tokens: components use these, and dark mode just swaps the variables. */
+@theme inline {
+  --color-page: var(--page);
+  --color-card: var(--card);
+  --color-soft: var(--soft);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+}
+
 @theme {
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
+  --color-brand-400: #818cf8;
   --color-brand-500: #6366f1;
   --color-brand-600: #4f46e5;
   --color-brand-700: #4338ca;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
+
+:root {
+  --page: #f8fafc;
+  --card: #ffffff;
+  --soft: #f1f5f9;
+  --line: #e2e8f0;
+  --ink: #0f172a;
+  --ink-2: #475569;
+  --ink-3: #94a3b8;
+  color-scheme: light;
+}
+.dark {
+  --page: #0b1120;
+  --card: #131c2e;
+  --soft: #1e293b;
+  --line: #273449;
+  --ink: #f1f5f9;
+  --ink-2: #cbd5e1;
+  --ink-3: #64748b;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--font-display); }
 
 /* Slide caption text drifts in from the left (from the original design). */
 @keyframes slide-in-left {
@@ -15,6 +58,19 @@
   to { opacity: 1; transform: translateX(0); }
 }
 .animate-slide-in { animation: slide-in-left 0.7s ease-out both; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.animate-toast { animation: toast-in 0.25s ease-out both; }
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.animate-pop { animation: pop 0.35s ease-out; }
 
 /* Info panel revealed with a clip-path circle that grows from the info icon. */
 .reveal-panel {
@@ -25,3 +81,9 @@
 .reveal-trigger:focus-within .reveal-panel {
   clip-path: circle(150% at calc(100% - 2rem) 2rem);
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@keyframes grow { from { width: 0; } to { width: 100%; } }

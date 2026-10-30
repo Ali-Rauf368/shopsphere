@@ -8,6 +8,7 @@ const { databaseUrl, stop } = await startPgSandbox();
 process.env.DATABASE_URL = databaseUrl;
 process.env.JWT_SECRET ??= "e2e-secret";
 process.env.BCRYPT_ROUNDS = "4";
+process.env.AUTH_RATE_LIMIT ??= "100000";
 process.env.PORT ??= "4100";
 process.env.CLIENT_ORIGIN ??= "http://localhost:5181";
 
