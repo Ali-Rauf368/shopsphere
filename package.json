@@ -1,0 +1,24 @@
+{
+  "name": "shopsphere",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "db:start": "bash scripts/dev-db.sh start",
+    "db:stop": "bash scripts/dev-db.sh stop",
+    "db:migrate": "npm -w server run migrate",
+    "db:seed": "npm -w server run seed",
+    "dev": "npm -w server run dev & npm -w client run dev",
+    "build": "npm -w server run build && npm -w client run build",
+    "test": "npm -w server test",
+    "test:e2e": "npm -w client run test:e2e",
+    "typecheck": "npm -w server run typecheck && npm -w client run typecheck"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true,
+    "esbuild@0.28.2": true,
+    "@scarf/scarf": false
+  }
+}
